@@ -1,67 +1,109 @@
 let allProducts = [];
-let selectedCat = "all";
-
-const searchInput = document.getElementById("search");
 
 async function loadMenu() {
- const res = await fetch("/api/products/public");
- allProducts = await res.json();
- render();
+
+  const res =
+    await fetch("/api/products/public");
+
+  allProducts =
+    await res.json();
+
+  render();
 }
 
 function render() {
- const menu = document.getElementById("menu");
- menu.innerHTML = "";
 
- let filtered = allProducts;
+  const menu =
+    document.getElementById("menu");
 
- if (selectedCat !== "all") {
-  filtered = filtered.filter(p => p.category === selectedCat);
- }
+  menu.innerHTML = "";
 
- const search = searchInput.value.toLowerCase();
+  const categories = [
+    "Caffetteria",
+    "Bevande",
+    "Pranzo",
+    "Tè & Infusi",
+    "Specialità"
+  ];
 
- if (search) {
-  filtered = filtered.filter(p =>
-   p.name.toLowerCase().includes(search)
-  );
- }
+  categories.forEach(category => {
 
- filtered.forEach(p => {
-  menu.innerHTML += `
-   <div class="card">
-    <h3>${p.name}</h3>
-    <p>${p.description || ""}</p>
-    <div class="price">€${p.price}</div>
-   </div>
-  `;
- });
-}
+    const products =
+      allProducts.filter(
+        p => p.category === category
+      );
 
-/* CATEGORY FILTER */
-document.querySelectorAll(".cat").forEach(btn => {
- btn.addEventListener("click", () => {
-  document.querySelectorAll(".cat").forEach(b =>
-   b.classList.remove("active")
-  );
+    if (!products.length) return;
 
-  btn.classList.add("active");
-  selectedCat = btn.dataset.cat;
+    const section =
+      document.createElement("section");
 
-  render();
- });
-});
+    section.className =
+      "menu-section";
 
-/* SEARCH LIVE */
-searchInput.addEventListener("input", render);
+    section.innerHTML = `
+      <h2 class="category-title">
+        ${category}
+      </h2>
+    `;
 
-/* DARK MODE (AUTO) */
-const prefersDark =
- window.matchMedia("(prefers-color-scheme: dark)")
- .matches;
+    products.forEach((p,index)=>{
 
-if (prefersDark) {
- document.body.classList.add("dark");
+      const row =
+        document.createElement("article");
+
+      row.className =
+        "menu-row";
+
+      if(index % 2 !== 0){
+        row.classList.add("reverse");
+      }
+
+      const image =
+        p.image
+        ? `/uploads/${p.image}`
+        : "/assets/logo.png";
+
+      row.innerHTML = `
+
+        <div class="menu-image">
+
+          <img
+            src="${image}"
+            loading="lazy"
+            alt="${p.name}"
+          >
+
+        </div>
+
+        <div class="menu-content">
+
+          <div class="menu-header">
+
+            <h3>${p.name}</h3>
+
+            <span>
+              €${Number(p.price).toFixed(2)}
+            </span>
+
+          </div>
+
+          <p>
+            ${p.description || ""}
+          </p>
+
+        </div>
+
+      `;
+
+      section.appendChild(row);
+
+    });
+
+    menu.appendChild(section);
+
+  });
+
 }
 
 loadMenu();

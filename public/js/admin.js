@@ -1,119 +1,164 @@
-let draggedId = null;
+let editingId = null;
 
+/* LOGIN */
 async function login() {
 
- const username = document.getElementById("user").value;
- const password = document.getElementById("pass").value;
+  const res = await fetch("/api/admin/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({
+      username: user.value,
+      password: pass.value
+    })
+  });
 
- const res = await fetch("/api/admin/login", {
-  method:"POST",
-  headers:{ "Content-Type":"application/json" },
-  body: JSON.stringify({ username, password })
- });
+  if (!res.ok) return toast.error("Login errato");
 
- if(res.ok){
-  document.getElementById("loginBox").style.display="none";
-  document.getElementById("panel").classList.remove("hidden");
+  loginBox.classList.add("hidden");
+  panel.classList.remove("hidden");
+
+  toast.success("Login ok");
   load();
- }
 }
 
+/* LOAD */
 async function load() {
- const res = await fetch("/api/products/admin");
- const data = await res.json();
 
- const list = document.getElementById("list");
- list.innerHTML = "";
+  const res = await fetch("/api/products/admin", {
+    credentials: "include"
+  });
 
- const total = data.length;
- const visible = data.filter(p => p.visible).length;
+  const data = await res.json();
 
- list.innerHTML += `
-  <div class="card"
-    draggable="true"
-    ondragstart="drag(${p.id})"
-    ondragover="event.preventDefault()"
-    ondrop="drop(${p.id})"
-    >
-   <h3>📊 Dashboard</h3>
-   <p>Totale: ${total}</p>
-   <p>Visibili: ${visible}</p>
-  </div>
- `;
+  list.innerHTML = "";
 
- data.forEach(p => {
-  list.innerHTML += `
-   <div class="card"
- draggable="true"
- ondragstart="drag(${p.id})"
- ondragover="event.preventDefault()"
- ondrop="drop(${p.id})"
->
-    <h3>${p.name}</h3>
+  data.forEach(p => {
 
-    <button onclick="toggle(${p.id},${p.visible})">
-     ${p.visible ? "Nascondi" : "Mostra"}
-    </button>
+    const div = document.createElement("div");
+    div.className = "admin-product";
 
-    <button onclick="removeItem(${p.id})">
-     Elimina
-    </button>
-   </div>
-  `;
- });
+    div.innerHTML = `
+      <div class="admin-product-left">
+
+        <img class="admin-thumb"
+          src="${p.image ? '/uploads/' + p.image : '/assets/logo.png'}"
+        />
+
+        <div>
+          <h4>${p.name}</h4>
+          <p>€${Number(p.price).toFixed(2)}</p>
+        </div>
+
+      </div>
+
+      <div class="admin-actions">
+
+        <button onclick="edit(${p.id})">Edit</button>
+
+        <button onclick="toggle(${p.id}, ${p.visible})">
+          ${p.visible ? "Hide" : "Show"}
+        </button>
+
+        <button onclick="del(${p.id})">Delete</button>
+
+      </div>
+    `;
+
+    list.appendChild(div);
+  });
 }
 
-async function addProduct() {
+/* SAVE (CREATE + UPDATE) */
+async function save() {
 
- const formData = new FormData();
+  const form = new FormData();
 
- formData.append("name", name.value);
- formData.append("price", price.value);
- formData.append("description", desc.value);
- formData.append("category", category.value);
- formData.append("image", image.files[0]);
+  form.append("name", name.value);
+  form.append("price", price.value);
+  form.append("description", desc.value);
+  form.append("category", category.value);
 
- await fetch("/api/products", {
-  method:"POST",
-  body: formData
- });
+  if (image.files[0]) {
+    form.append("image", image.files[0]);
+  }
 
- load();
+  const url = editingId
+    ? `/api/products/${editingId}`
+    : "/api/products";
+
+  const method = editingId ? "PUT" : "POST";
+
+  const res = await fetch(url, {
+    method,
+    credentials: "include",
+    body: form
+  });
+
+  if (!res.ok) return toast.error("Errore");
+
+  editingId = null;
+
+  clear();
+
+  toast.success("Salvato");
+
+  load();
 }
 
-async function removeItem(id){
- await fetch(`/api/products/${id}`, {
-  method:"DELETE"
- });
+/* EDIT FIX */
+async function edit(id) {
 
- load();
+  const res = await fetch("/api/products/admin", {
+    credentials: "include"
+  });
+
+  const data = await res.json();
+
+  const p = data.find(x => x.id === id);
+
+  editingId = id;
+
+  name.value = p.name;
+  price.value = p.price;
+  desc.value = p.description;
+  category.value = p.category;
+
+  toast.info("Editing mode");
 }
 
-async function toggle(id,visible){
- await fetch(`/api/products/${id}/visibility`, {
-  method:"PUT",
-  headers:{ "Content-Type":"application/json" },
-  body: JSON.stringify({ visible: visible ? 0 : 1 })
- });
+/* DELETE */
+async function del(id) {
 
- load();
+  await fetch(`/api/products/${id}`, {
+    method: "DELETE",
+    credentials: "include"
+  });
+
+  load();
 }
 
-function drag(id){
- draggedId = id;
+/* TOGGLE */
+async function toggle(id, v) {
+
+  await fetch(`/api/products/${id}/visibility`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ visible: v ? 0 : 1 })
+  });
+
+  load();
 }
 
-async function drop(targetId){
-
- await fetch("/api/products/reorder", {
-  method:"PUT",
-  headers:{ "Content-Type":"application/json" },
-  body: JSON.stringify({
-   draggedId,
-   targetId
-  })
- });
-
- load();
+/* CLEAR */
+function clear() {
+  name.value = "";
+  price.value = "";
+  desc.value = "";
+  image.value = "";
 }
 
+/* INIT */
+loginBtn.onclick = login;
+addBtn.onclick = save;

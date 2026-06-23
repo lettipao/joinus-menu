@@ -1,71 +1,43 @@
 const express = require("express");
 const router = express.Router();
 
-const ProductController =
- require("../controllers/productController");
-
-const auth =
- require("../middleware/auth");
-
-const upload =
- require("../middleware/upload");
+const ProductController = require("../controllers/productController");
+const auth = require("../middleware/auth");
+const upload = require("../middleware/upload");
+const Product = require("../models/productModel");
 
 /* PUBLIC */
-router.get(
- "/public",
- ProductController.publicMenu
-);
+router.get("/public", ProductController.publicMenu);
 
 /* ADMIN */
-router.get(
- "/admin",
- auth,
- ProductController.adminMenu
-);
+router.get("/admin", auth, ProductController.adminMenu);
 
-/* CREATE PRODUCT */
-router.post(
- "/",
- auth,
- upload.single("image"),
- ProductController.create
-);
+/* CREATE */
+router.post("/", auth, upload.single("image"), ProductController.create);
 
 /* DELETE */
-router.delete(
- "/:id",
- auth,
- ProductController.remove
-);
+router.delete("/:id", auth, ProductController.remove);
 
-/* TOGGLE VISIBILITY */
-router.put(
- "/:id/visibility",
- auth,
- ProductController.toggle
-);
+/* TOGGLE */
+router.put("/:id/visibility", auth, ProductController.toggle);
 
-router.put("/reorder", auth, async (req,res)=>{
+/* UPDATE */
+router.put("/:id", auth, upload.single("image"), ProductController.update);
 
- const {draggedId, targetId} = req.body;
+/* =========================
+   REORDER (PRODUCTION SAFE)
+========================= */
+router.put("/reorder", auth, async (req, res) => {
+  try {
+    const { draggedId, targetId } = req.body;
 
- const db = require("../models/database");
+    await Product.reorder(draggedId, targetId);
 
- db.serialize(()=>{
+    res.json({ success: true });
 
-  db.run(
-   "UPDATE products SET position = position + 1 WHERE id = ?",
-   [targetId]
-  );
-
-  db.run(
-   "UPDATE products SET position = position - 1 WHERE id = ?",
-   [draggedId]
-  );
-
- });
-
- res.json({success:true});
+  } catch (e) {
+    res.status(500).json({ error: "reorder failed" });
+  }
 });
 
 module.exports = router;

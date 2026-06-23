@@ -4,55 +4,160 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-<title>Admin Panel</title>
+<title>Admin Dashboard</title>
 
 <link rel="stylesheet" href="/css/style.css"/>
 </head>
 
 <body>
 
-<div class="admin">
-
-<h2>Admin Login</h2>
-
+<!-- =========================
+     LOGIN
+========================= -->
 <div id="loginBox">
 
-<input id="user" placeholder="Username"/>
-<input id="pass" type="password" placeholder="Password"/>
+  <h2>Admin Access</h2>
 
-<button onclick="login()">Login</button>
+  <div class="form-group">
+    <input id="user" placeholder="Username"/>
+  </div>
 
-</div>
+  <div class="form-group">
+    <input id="pass" type="password" placeholder="Password"/>
+  </div>
 
-<div id="panel" class="hidden">
-
-<h2>Gestione Menu</h2>
-
-<input id="name" placeholder="Nome"/>
-<input id="price" placeholder="Prezzo"/>
-<input id="desc" placeholder="Descrizione"/>
-
-<select id="category">
- <option>Caffetteria</option>
- <option>Bevande</option>
- <option>Pranzo</option>
- <option>Tè & Infusi</option>
- <option>Specialità</option>
-</select>
-
-<input type="file" id="image"/>
-
-<button onclick="addProduct()">Aggiungi</button>
-
-<hr/>
-
-<div id="list"></div>
+  <button id="loginBtn" class="btn-primary">
+    Login
+  </button>
 
 </div>
 
+<!-- =========================
+     PANEL
+========================= -->
+<div id="panel" class="hidden admin">
+
+  <h1 class="admin-title">Dashboard ☕</h1>
+
+  <div class="admin-grid">
+
+    <!-- =====================
+         LEFT: FORM
+    ====================== -->
+    <div class="panel-card">
+
+      <h3>Nuovo prodotto</h3>
+
+      <div class="form-group">
+        <input id="name" placeholder="Nome prodotto"/>
+      </div>
+
+      <div class="form-group">
+        <input id="price" placeholder="Prezzo"/>
+      </div>
+
+      <div class="form-group">
+        <input id="desc" placeholder="Descrizione"/>
+      </div>
+
+      <div class="form-group">
+        <select id="category">
+          <option>Caffetteria</option>
+          <option>Bevande</option>
+          <option>Pranzo</option>
+          <option>Tè & Infusi</option>
+          <option>Specialità</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <input type="file" id="image"/>
+      </div>
+
+      <!-- IMAGE PREVIEW -->
+      <div class="preview" id="preview">
+        <img id="previewImg"/>
+      </div>
+
+      <button id="addBtn" class="btn-primary">
+        Aggiungi prodotto
+      </button>
+
+    </div>
+
+    <!-- =====================
+         RIGHT: DASHBOARD + LIST
+    ====================== -->
+    <div>
+
+      <!-- DASHBOARD -->
+      <div class="dashboard">
+
+        <div class="stat-card">
+          <span>Prodotti</span>
+          <strong id="statTotal">0</strong>
+        </div>
+
+        <div class="stat-card">
+          <span>Visibili</span>
+          <strong id="statVisible">0</strong>
+        </div>
+
+        <div class="stat-card">
+          <span>Nascosti</span>
+          <strong id="statHidden">0</strong>
+        </div>
+
+      </div>
+
+      <!-- LIST -->
+      <div id="list"></div>
+
+      <!-- EMPTY STATE -->
+      <div id="empty" class="empty-state hidden">
+        <h3>☕ Nessun prodotto</h3>
+        <p>Aggiungi il primo prodotto per iniziare</p>
+      </div>
+
+    </div>
+
+  </div>
+
 </div>
 
+<!-- =========================
+     SCRIPTS
+========================= -->
+<script src="/js/toast.js"></script>
+<script src="/js/modal.js"></script>
 <script src="/js/admin.js"></script>
+
+<script>
+/* =========================
+   IMAGE PREVIEW
+========================= */
+const input = document.getElementById("image");
+const preview = document.getElementById("preview");
+const previewImg = document.getElementById("previewImg");
+
+input?.addEventListener("change", () => {
+  const file = input.files[0];
+
+  if (!file) {
+    preview.style.display = "none";
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = (e) => {
+    previewImg.src = e.target.result;
+    preview.style.display = "block";
+  };
+
+  reader.readAsDataURL(file);
+});
+</script>
 
 </body>
 </html>

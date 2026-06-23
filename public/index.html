@@ -15,32 +15,29 @@
 
 <body>
 
-<header class="topbar">
+<header class="menu-hero">
 
-<img
-src="https://joinusmilano.it/wp-content/uploads/2025/07/logo-blu-scuro_300px-1.png"
-class="logo"/>
+  <img
+    src="/assets/logo.png"
+    class="hero-logo"
+    alt="Join Us"
+  >
 
-<h1>Menu</h1>
+  <h1>Join Us Milano</h1>
+
+  <p>
+    Coffee • Food • Tea
+  </p>
 
 </header>
 
-<div class="search">
- <input id="search" placeholder="Cerca un prodotto..."/>
-</div>
-
-<div class="categories">
-  <button class="cat active" data-cat="all">Tutto</button>
-  <button class="cat" data-cat="Caffetteria">Caffetteria</button>
-  <button class="cat" data-cat="Bevande">Bevande</button>
-  <button class="cat" data-cat="Pranzo">Pranzo</button>
-  <button class="cat" data-cat="Tè & Infusi">Tè</button>
-  <button class="cat" data-cat="Specialità">Specialità</button>
-</div>
-
-<div class="menu" id="menu"></div>
+<main
+  id="menu"
+  class="fine-menu"
+></main>
 
 <script src="/js/menu.js"></script>
+
 <script>
 if ("serviceWorker" in navigator) {
  navigator.serviceWorker.register("/sw.js");

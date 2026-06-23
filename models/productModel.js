@@ -1,142 +1,99 @@
 const db = require("./database");
-exports.getAllProducts = () => {
 
- return new Promise((resolve,reject)=>{
+function run(sql, params = []) {
+  return new Promise((res, rej) => {
+    db.run(sql, params, function (err) {
+      if (err) return rej(err);
+      res(this);
+    });
+  });
+}
 
-  db.all(
-   `
-   SELECT *
-   FROM products
-   ORDER BY position ASC
-   `,
-   [],
-   (err,rows)=>{
+function all(sql, params = []) {
+  return new Promise((res, rej) => {
+    db.all(sql, params, (err, rows) => {
+      if (err) return rej(err);
+      res(rows);
+    });
+  });
+}
 
-    if(err) reject(err);
+/* GET ALL */
+exports.getAllProducts = () =>
+  all("SELECT * FROM products ORDER BY position ASC");
 
-    resolve(rows);
+/* GET VISIBLE */
+exports.getVisibleProducts = () =>
+  all("SELECT * FROM products WHERE visible=1 ORDER BY position ASC");
 
-   }
+/* CREATE */
+exports.createProduct = (p) =>
+  run(`
+    INSERT INTO products (
+      name, description, price,
+      image, category,
+      visible, position
+    )
+    VALUES (?,?,?,?,?,?,?)
+  `, [
+    p.name,
+    p.description,
+    Number(p.price),
+    p.image,
+    p.category,
+    p.visible ?? 1,
+    p.position ?? 0
+  ]).then(r => r.lastID);
+
+/* DELETE */
+exports.deleteProduct = (id) =>
+  run("DELETE FROM products WHERE id=?", [id]);
+
+/* VISIBILITY */
+exports.updateVisibility = (id, v) =>
+  run(
+    "UPDATE products SET visible=? WHERE id=?",
+    [v, id]
   );
 
- });
+/* UPDATE */
+exports.updateProduct = (id, p) =>
+  run(`
+    UPDATE products
+    SET name=?, description=?, price=?, image=?, category=?
+    WHERE id=?
+  `, [
+    p.name,
+    p.description,
+    Number(p.price),
+    p.image,
+    p.category,
+    id
+  ]);
 
-};
+/* =========================
+   SAFE REORDER (NEW)
+========================= */
+exports.reorder = async (draggedId, targetId) => {
 
-exports.getVisibleProducts = () => {
-
- return new Promise((resolve,reject)=>{
-
-  db.all(
-   `
-   SELECT *
-   FROM products
-   WHERE visible=1
-   ORDER BY position ASC
-   `,
-   [],
-   (err,rows)=>{
-
-    if(err) reject(err);
-
-    resolve(rows);
-
-   }
+  const items = await all(
+    "SELECT id FROM products ORDER BY position ASC"
   );
 
- });
+  const draggedIndex = items.findIndex(x => x.id == draggedId);
+  const targetIndex = items.findIndex(x => x.id == targetId);
 
-};
+  if (draggedIndex < 0 || targetIndex < 0) return;
 
-exports.createProduct = product => {
+  const moved = items.splice(draggedIndex, 1)[0];
+  items.splice(targetIndex, 0, moved);
 
- return new Promise((resolve,reject)=>{
-
-  db.run(
-   `
-   INSERT INTO products
-   (
-    name,
-    description,
-    price,
-    image,
-    category,
-    allergens,
-    visible,
-    featured,
-    position
-   )
-
-   VALUES(?,?,?,?,?,?,?,?,?)
-   `,
-   [
-    product.name,
-    product.description,
-    product.price,
-    product.image,
-    product.category,
-    product.allergens,
-    product.visible,
-    product.featured,
-    product.position
-   ],
-
-   function(err){
-
-    if(err) reject(err);
-
-    resolve(this.lastID);
-
-   }
+  const updates = items.map((item, index) =>
+    run(
+      "UPDATE products SET position=? WHERE id=?",
+      [index, item.id]
+    )
   );
 
- });
-
-};
-
-exports.deleteProduct = id => {
-
- return new Promise((resolve,reject)=>{
-
-  db.run(
-   `
-   DELETE FROM products
-   WHERE id=?
-   `,
-   [id],
-   err=>{
-
-    if(err) reject(err);
-
-    resolve();
-
-   }
-  );
-
- });
-
-};
-
-exports.updateVisibility = (id,visible)=>{
-
- return new Promise((resolve,reject)=>{
-
-  db.run(
-   `
-   UPDATE products
-   SET visible=?
-   WHERE id=?
-   `,
-   [visible,id],
-   err=>{
-
-    if(err) reject(err);
-
-    resolve();
-
-   }
-  );
-
- });
-
+  await Promise.all(updates);
 };

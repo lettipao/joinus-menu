@@ -4,61 +4,85 @@ const express = require("express");
 const session = require("express-session");
 const helmet = require("helmet");
 const cors = require("cors");
-const compression = require("compression");
-const path = require("path");
+const rateLimit = require("express-rate-limit");
 
 const app = express();
 
-/* ROUTES */
-const adminRoutes =
- require("./routes/adminRoutes");
+app.set("trust proxy", 1);
 
-const productRoutes =
- require("./routes/productRoutes");
+/* =========================
+   SECURITY
+========================= */
 
-/* SECURITY */
 app.use(helmet());
-app.use(cors());
-app.use(compression());
 
-/* BODY */
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
+
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300
+}));
+
+/* =========================
+   BODY
+========================= */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/* SESSION */
-app.use(
- session({
-  secret: process.env.SESSION_SECRET,
+/* =========================
+   SESSION
+========================= */
+app.use(session({
+  secret: process.env.SESSION_SECRET || "dev_secret",
   resave: false,
   saveUninitialized: false,
   cookie: {
-   httpOnly: true
+    httpOnly: true,
+    sameSite: "lax",
+    secure: false
   }
- })
-);
+}));
 
-/* STATIC */
+/* =========================
+   CSP (less broken)
+========================= */
+app.use((req, res, next) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    [
+      "default-src 'self'",
+      "script-src 'self'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: /uploads",
+      "connect-src 'self'"
+    ].join("; ")
+  );
+  next();
+});
+
+/* =========================
+   STATIC
+========================= */
 app.use(express.static("public"));
 app.use("/uploads", express.static("uploads"));
 
-/* ROUTES */
-app.use("/api/admin", adminRoutes);
-app.use("/api/products", productRoutes);
+/* =========================
+   ROUTES
+========================= */
+app.use("/api/admin", require("./routes/adminRoutes"));
+app.use("/api/products", require("./routes/productRoutes"));
 
-/* HEALTH CHECK */
-app.get("/api/health", (req, res) => {
- res.json({ status: "ok" });
+/* =========================
+   ERROR HANDLER
+========================= */
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ message: "Internal error" });
 });
 
-/* START */
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
- console.log("Server running on port " + PORT);
-});
-
-app.get("/qr", (req,res)=>{
- res.json({
-  url: "da_fare"
- });
+app.listen(process.env.PORT || 3000, () => {
+  console.log("http://localhost:3000");
 });

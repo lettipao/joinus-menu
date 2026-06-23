@@ -16,5 +16,4 @@ exports.findAdmin = username => {
   );
 
  });
-
 };
