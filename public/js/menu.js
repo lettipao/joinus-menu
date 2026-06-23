@@ -20,10 +20,11 @@ function render() {
 
   const categories = [
     "Caffetteria",
-    "Bevande",
-    "Pranzo",
-    "Tè & Infusi",
-    "Specialità"
+    "dolce",
+    "salato",
+    "Te",
+    "Specialità di oggi",
+    "beverage"
   ];
 
   categories.forEach(category => {
@@ -38,8 +39,17 @@ function render() {
     const section =
       document.createElement("section");
 
-    section.className =
-      "menu-section";
+section.className = "menu-section";
+
+const ids = {
+  "Caffetteria": "caffetteria",
+  "dolce": "dolce",
+  "salato": "salato",
+  "Te": "te",
+  "Specialità": "specialita"
+};
+
+section.id = ids[category];
 
     section.innerHTML = `
       <h2 class="category-title">
@@ -97,6 +107,16 @@ function render() {
       `;
 
       section.appendChild(row);
+      if(index !== products.length - 1){
+
+  const divider =
+    document.createElement("div");
+
+  divider.className =
+    "menu-divider";
+
+  section.appendChild(divider);
+}
 
     });
 
@@ -107,3 +127,33 @@ function render() {
 }
 
 loadMenu();
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    const toggle =
+      document.getElementById("menuToggle");
+
+    const side =
+      document.getElementById("sideMenu");
+
+    const overlay =
+      document.getElementById("menuOverlay");
+
+    toggle.addEventListener("click", () => {
+
+      side.classList.toggle("open");
+      overlay.classList.toggle("open");
+
+    });
+
+    overlay.addEventListener("click", () => {
+
+      side.classList.remove("open");
+      overlay.classList.remove("open");
+
+    });
+
+  }
+);

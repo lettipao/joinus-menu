@@ -1,5 +1,19 @@
 let editingId = null;
 
+function resetEditor() {
+
+  editingId = null;
+
+  nome.value = "";
+  price.value = "";
+  desc.value = "";
+  image.value = "";
+
+  category.selectedIndex = 0;
+
+  toast.success("Modalità creazione");
+}
+
 /* LOGIN */
 async function login() {
 
@@ -38,32 +52,58 @@ async function load() {
     const div = document.createElement("div");
     div.className = "admin-product";
 
-    div.innerHTML = `
-      <div class="admin-product-left">
+    const left = document.createElement("div");
+left.className = "admin-product-left";
 
-        <img class="admin-thumb"
-          src="${p.image ? '/uploads/' + p.image : '/assets/logo.png'}"
-        />
+left.innerHTML = `
+  <img
+    class="admin-thumb"
+    src="${
+      p.image
+      ? `/uploads/${p.image}`
+      : '/assets/logo.png'
+    }"
+  />
 
-        <div>
-          <h4>${p.name}</h4>
-          <p>€${Number(p.price).toFixed(2)}</p>
-        </div>
+  <div>
+    <h4>${p.name}</h4>
+    <p>€${Number(p.price).toFixed(2)}</p>
+  </div>
+`;
 
-      </div>
+const actions = document.createElement("div");
+actions.className = "admin-actions";
 
-      <div class="admin-actions">
+const editBtn = document.createElement("button");
+editBtn.textContent = "Edit";
 
-        <button onclick="edit(${p.id})">Edit</button>
+const toggleBtn = document.createElement("button");
+toggleBtn.textContent =
+  p.visible
+  ? "Hide"
+  : "Show";
 
-        <button onclick="toggle(${p.id}, ${p.visible})">
-          ${p.visible ? "Hide" : "Show"}
-        </button>
+const deleteBtn = document.createElement("button");
+deleteBtn.textContent = "Delete";
 
-        <button onclick="del(${p.id})">Delete</button>
+editBtn.addEventListener("click", () => {
+  edit(p.id);
+});
 
-      </div>
-    `;
+toggleBtn.addEventListener("click", () => {
+  toggle(p.id, p.visible);
+});
+
+deleteBtn.addEventListener("click", () => {
+  del(p.id);
+});
+
+actions.appendChild(editBtn);
+actions.appendChild(toggleBtn);
+actions.appendChild(deleteBtn);
+
+div.appendChild(left);
+div.appendChild(actions);
 
     list.appendChild(div);
   });
@@ -74,7 +114,7 @@ async function save() {
 
   const form = new FormData();
 
-  form.append("name", name.value);
+  form.append("name", nome.value);
   form.append("price", price.value);
   form.append("description", desc.value);
   form.append("category", category.value);
@@ -119,7 +159,7 @@ async function edit(id) {
 
   editingId = id;
 
-  name.value = p.name;
+  nome.value = p.name;
   price.value = p.price;
   desc.value = p.description;
   category.value = p.category;
@@ -153,7 +193,7 @@ async function toggle(id, v) {
 
 /* CLEAR */
 function clear() {
-  name.value = "";
+  nome.value = "";
   price.value = "";
   desc.value = "";
   image.value = "";

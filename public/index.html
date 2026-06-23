@@ -15,6 +15,28 @@
 
 <body>
 
+  <button id="menuToggle" class="menu-toggle">
+  ☰
+</button>
+
+<nav id="sideMenu" class="side-menu">
+
+  <a href="#caffetteria">Caffetteria</a>
+
+  <a href="#dolce">dolce</a>
+
+  <a href="#salato">salato</a>
+
+  <a href="#te">Te</a>
+
+  <a href="#specialita di oggi">Specialità di oggi</a>
+
+  <a href="#beverage">beverage</a>
+
+</nav>
+
+<div id="menuOverlay" class="menu-overlay"></div>
+
 <header class="menu-hero">
 
   <img
@@ -22,8 +44,6 @@
     class="hero-logo"
     alt="Join Us"
   >
-
-  <h1>Join Us Milano</h1>
 
   <p>
     Coffee • Food • Tea
@@ -37,12 +57,6 @@
 ></main>
 
 <script src="/js/menu.js"></script>
-
-<script>
-if ("serviceWorker" in navigator) {
- navigator.serviceWorker.register("/sw.js");
-}
-</script>
 
 </body>
 </html>
