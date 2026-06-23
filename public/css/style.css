@@ -1,0 +1,142 @@
+body {
+ margin:0;
+ font-family: system-ui;
+ background:#f7f7f7;
+ color:#111;
+}
+
+/* TOP BAR */
+.topbar{
+ text-align:center;
+ padding:20px;
+ background:#102447;
+ color:white;
+}
+
+.logo{
+ width:120px;
+ margin-bottom:10px;
+}
+
+/* CATEGORIES */
+.categories{
+ display:flex;
+ overflow-x:auto;
+ gap:10px;
+ padding:10px;
+ background:white;
+ position:sticky;
+ top:0;
+}
+
+.cat{
+ padding:10px 15px;
+ border:none;
+ border-radius:20px;
+ background:#eee;
+ white-space:nowrap;
+}
+
+.cat.active{
+ background:#102447;
+ color:white;
+}
+
+/* MENU */
+.menu{
+ padding:15px;
+ display:flex;
+ flex-direction:column;
+ gap:12px;
+}
+
+.card{
+ background:white;
+ padding:15px;
+ border-radius:15px;
+ box-shadow:0 5px 15px rgba(0,0,0,0.08);
+}
+
+.card h3{
+ margin:0;
+}
+
+.price{
+ font-weight:bold;
+ color:#102447;
+}
+
+/* ADMIN */
+.admin{
+ padding:20px;
+}
+
+input, select, button{
+ width:100%;
+ padding:12px;
+ margin:8px 0;
+ border-radius:10px;
+ border:1px solid #ddd;
+}
+
+button{
+ background:#102447;
+ color:white;
+ border:none;
+}
+
+.hidden{
+ display:none;
+}
+
+.search{
+ padding:10px;
+ background:white;
+ position:sticky;
+ top:60px;
+ z-index:10;
+}
+
+.search input{
+ width:100%;
+ padding:12px;
+ border-radius:12px;
+ border:1px solid #ddd;
+}
+
+/* DARK MODE */
+body.dark{
+ background:#0f0f0f;
+ color:white;
+}
+
+body.dark .card{
+ background:#1a1a1a;
+ color:white;
+}
+
+body.dark .categories,
+body.dark .search{
+ background:#111;
+}
+
+body.dark .cat{
+ background:#222;
+ color:white;
+}
+
+.card{
+ transition: all .2s ease;
+}
+
+.card:hover{
+ transform: translateY(-3px) scale(1.01);
+}
+
+button{
+ transition:.2s ease;
+}
+
+button:active{
+ transform: scale(0.97);
+}

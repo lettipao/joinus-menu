@@ -1,0 +1,9 @@
+{
+ "name": "Join Us Milano Menu",
+ "short_name": "Menu",
+ "start_url": "/",
+ "display": "standalone",
+ "background_color": "#ffffff",
+ "theme_color": "#102447",
+ "icons": []
+}

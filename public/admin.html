@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Admin Panel</title>
+
+<link rel="stylesheet" href="/css/style.css"/>
+</head>
+
+<body>
+
+<div class="admin">
+
+<h2>Admin Login</h2>
+
+<div id="loginBox">
+
+<input id="user" placeholder="Username"/>
+<input id="pass" type="password" placeholder="Password"/>
+
+<button onclick="login()">Login</button>
+
+</div>
+
+<div id="panel" class="hidden">
+
+<h2>Gestione Menu</h2>
+
+<input id="name" placeholder="Nome"/>
+<input id="price" placeholder="Prezzo"/>
+<input id="desc" placeholder="Descrizione"/>
+
+<select id="category">
+ <option>Caffetteria</option>
+ <option>Bevande</option>
+ <option>Pranzo</option>
+ <option>Tè & Infusi</option>
+ <option>Specialità</option>
+</select>
+
+<input type="file" id="image"/>
+
+<button onclick="addProduct()">Aggiungi</button>
+
+<hr/>
+
+<div id="list"></div>
+
+</div>
+
+</div>
+
+<script src="/js/admin.js"></script>
+
+</body>
+</html>

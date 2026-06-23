@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Join Us Milano | Menu</title>
+
+<link rel="stylesheet" href="/css/style.css" />
+
+<link rel="manifest" href="/manifest.json">
+
+<meta name="theme-color" content="#102447"/>
+</head>
+
+<body>
+
+<header class="topbar">
+
+<img
+src="https://joinusmilano.it/wp-content/uploads/2025/07/logo-blu-scuro_300px-1.png"
+class="logo"/>
+
+<h1>Menu</h1>
+
+</header>
+
+<div class="search">
+ <input id="search" placeholder="Cerca un prodotto..."/>
+</div>
+
+<div class="categories">
+  <button class="cat active" data-cat="all">Tutto</button>
+  <button class="cat" data-cat="Caffetteria">Caffetteria</button>
+  <button class="cat" data-cat="Bevande">Bevande</button>
+  <button class="cat" data-cat="Pranzo">Pranzo</button>
+  <button class="cat" data-cat="Tè & Infusi">Tè</button>
+  <button class="cat" data-cat="Specialità">Specialità</button>
+</div>
+
+<div class="menu" id="menu"></div>
+
+<script src="/js/menu.js"></script>
+<script>
+if ("serviceWorker" in navigator) {
+ navigator.serviceWorker.register("/sw.js");
+}
+</script>
+
+</body>
+</html>
