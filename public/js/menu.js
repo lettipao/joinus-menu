@@ -19,11 +19,11 @@ function render() {
   menu.innerHTML = "";
 
   const categories = [
+    "Specialità",
     "Caffetteria",
     "dolce",
     "salato",
     "Te",
-    "Specialità di oggi",
     "beverage"
   ];
 
@@ -42,11 +42,12 @@ function render() {
 section.className = "menu-section";
 
 const ids = {
+  "Specialità": "specialità",
   "Caffetteria": "caffetteria",
   "dolce": "dolce",
   "salato": "salato",
   "Te": "te",
-  "Specialità": "specialita"
+  "beverage": "beverage"
 };
 
 section.id = ids[category];

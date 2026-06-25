@@ -37,7 +37,7 @@
 ========================= -->
 <div id="panel" class="hidden admin">
 
-  <h1 class="admin-title">Dashboard ☕</h1>
+  <h1 class="admin-title">Dashboard</h1>
 
   <div class="admin-grid">
 
@@ -45,11 +45,11 @@
          LEFT: FORM
     ====================== -->
 
-<button id="cancelEditBtn">
+<button id="showEditorBtn">
   Nuovo prodotto
 </button>
 
-    <div class="panel-card">
+    <div class="panel-card" id="newProduct">
 
       <h3>Nuovo prodotto</h3>
 
@@ -71,7 +71,7 @@
           <option>dolce</option>
           <option>salato</option>
           <option>Te</option>
-          <option>Specialità di oggi</option>
+          <option>Specialità</option>
           <option>beverage</option>
         </select>
       </div>
@@ -107,11 +107,6 @@
         <div class="stat-card">
           <span>Visibili</span>
           <strong id="statVisible">0</strong>
-        </div>
-
-        <div class="stat-card">
-          <span>Nascosti</span>
-          <strong id="statHidden">0</strong>
         </div>
 
       </div>

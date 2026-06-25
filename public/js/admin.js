@@ -1,5 +1,10 @@
 let editingId = null;
+let products = [];
 
+/* SHORTCUT */
+const $ = id => document.getElementById(id);
+
+/* RESET EDITOR */
 function resetEditor() {
 
   editingId = null;
@@ -11,6 +16,8 @@ function resetEditor() {
 
   category.selectedIndex = 0;
 
+  $("preview").style.display = "none";
+
   toast.success("Modalità creazione");
 }
 
@@ -19,7 +26,9 @@ async function login() {
 
   const res = await fetch("/api/admin/login", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json"
+    },
     credentials: "include",
     body: JSON.stringify({
       username: user.value,
@@ -27,12 +36,15 @@ async function login() {
     })
   });
 
-  if (!res.ok) return toast.error("Login errato");
+  if (!res.ok) {
+    return toast.error("Login errato");
+  }
 
   loginBox.classList.add("hidden");
   panel.classList.remove("hidden");
 
-  toast.success("Login ok");
+  toast.success("Login effettuato");
+
   load();
 }
 
@@ -43,73 +55,71 @@ async function load() {
     credentials: "include"
   });
 
-  const data = await res.json();
+  products = await res.json();
+
+  $("statTotal").textContent = products.length;
+
+  $("statVisible").textContent =
+    products.filter(p => p.visible === 1).length;
 
   list.innerHTML = "";
 
-  data.forEach(p => {
+  products.forEach(p => {
 
-    const div = document.createElement("div");
-    div.className = "admin-product";
-
-    const left = document.createElement("div");
-left.className = "admin-product-left";
-
-left.innerHTML = `
-  <img
-    class="admin-thumb"
-    src="${
-      p.image
+    const imagePath = p.image
       ? `/uploads/${p.image}`
-      : '/assets/logo.png'
-    }"
-  />
+      : "/assets/logo.png";
 
-  <div>
-    <h4>${p.name}</h4>
-    <p>€${Number(p.price).toFixed(2)}</p>
-  </div>
-`;
+    list.innerHTML += `
+      <div class="admin-product">
 
-const actions = document.createElement("div");
-actions.className = "admin-actions";
+        <div class="admin-product-left">
 
-const editBtn = document.createElement("button");
-editBtn.textContent = "Edit";
+          <img
+            class="admin-thumb"
+            src="${imagePath}"
+            alt="${p.name}"
+          >
 
-const toggleBtn = document.createElement("button");
-toggleBtn.textContent =
-  p.visible
-  ? "Hide"
-  : "Show";
+          <div>
+            <h4>${p.name}</h4>
+            <p>€${Number(p.price).toFixed(2)}</p>
+          </div>
 
-const deleteBtn = document.createElement("button");
-deleteBtn.textContent = "Delete";
+        </div>
 
-editBtn.addEventListener("click", () => {
-  edit(p.id);
-});
+        <div class="admin-actions">
 
-toggleBtn.addEventListener("click", () => {
-  toggle(p.id, p.visible);
-});
+          <button
+            id="edit-${p.id}"
+            data-action="edit"
+            data-id="${p.id}">
+            Edit
+          </button>
 
-deleteBtn.addEventListener("click", () => {
-  del(p.id);
-});
+          <button
+            id="toggle-${p.id}"
+            data-action="toggle"
+            data-id="${p.id}"
+            data-visible="${p.visible}">
+            ${p.visible ? "Hide" : "Show"}
+          </button>
 
-actions.appendChild(editBtn);
-actions.appendChild(toggleBtn);
-actions.appendChild(deleteBtn);
+          <button
+            id="delete-${p.id}"
+            data-action="delete"
+            data-id="${p.id}">
+            Delete
+          </button>
 
-div.appendChild(left);
-div.appendChild(actions);
+        </div>
 
-    list.appendChild(div);
+      </div>
+    `;
   });
 }
 
-/* SAVE (CREATE + UPDATE) */
+/* SAVE */
 async function save() {
 
   const form = new FormData();
@@ -127,7 +137,9 @@ async function save() {
     ? `/api/products/${editingId}`
     : "/api/products";
 
-  const method = editingId ? "PUT" : "POST";
+  const method = editingId
+    ? "PUT"
+    : "POST";
 
   const res = await fetch(url, {
     method,
@@ -135,27 +147,33 @@ async function save() {
     body: form
   });
 
-  if (!res.ok) return toast.error("Errore");
-
-  editingId = null;
+  if (!res.ok) {
+    return toast.error("Errore durante il salvataggio");
+  }
 
   clear();
 
-  toast.success("Salvato");
+  editingId = null;
+
+  toast.success(
+    method === "POST"
+      ? "Prodotto creato"
+      : "Prodotto aggiornato"
+  );
 
   load();
 }
 
-/* EDIT FIX */
+/* EDIT */
 async function edit(id) {
 
-  const res = await fetch("/api/products/admin", {
-    credentials: "include"
-  });
+  const p = products.find(
+    product => product.id == id
+  );
 
-  const data = await res.json();
-
-  const p = data.find(x => x.id === id);
+  if (!p) {
+    return toast.error("Prodotto non trovato");
+  }
 
   editingId = id;
 
@@ -164,28 +182,40 @@ async function edit(id) {
   desc.value = p.description;
   category.value = p.category;
 
-  toast.info("Editing mode");
+  $("newProduct").style.display = "block";
+
+  toast.info("Modalità modifica");
 }
 
 /* DELETE */
 async function del(id) {
+
+  if (!confirm("Eliminare il prodotto?")) {
+    return;
+  }
 
   await fetch(`/api/products/${id}`, {
     method: "DELETE",
     credentials: "include"
   });
 
+  toast.success("Prodotto eliminato");
+
   load();
 }
 
 /* TOGGLE */
-async function toggle(id, v) {
+async function toggle(id, visible) {
 
   await fetch(`/api/products/${id}/visibility`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json"
+    },
     credentials: "include",
-    body: JSON.stringify({ visible: v ? 0 : 1 })
+    body: JSON.stringify({
+      visible: visible ? 0 : 1
+    })
   });
 
   load();
@@ -193,11 +223,77 @@ async function toggle(id, v) {
 
 /* CLEAR */
 function clear() {
+
   nome.value = "";
   price.value = "";
   desc.value = "";
   image.value = "";
+
+  $("preview").style.display = "none";
+  $("newProduct").style.display = "none";
 }
+
+/* SHOW EDITOR */
+$("showEditorBtn").onclick = () => {
+
+  resetEditor();
+
+  $("newProduct").style.display = "block";
+};
+
+/* LIST ACTIONS */
+list.onclick = e => {
+
+  const btn = e.target.closest("button");
+
+  if (!btn) return;
+
+  const id = Number(btn.dataset.id);
+  const action = btn.dataset.action;
+
+  switch (action) {
+
+    case "edit":
+      edit(id);
+      break;
+
+    case "toggle":
+      toggle(
+        id,
+        Number(btn.dataset.visible)
+      );
+      break;
+
+    case "delete":
+      del(id);
+      break;
+  }
+};
+
+/* IMAGE PREVIEW */
+const imageInput = $("image");
+const previewImg = $("previewImg");
+const previewDiv = $("preview");
+
+imageInput.onchange = e => {
+
+  const file = e.target.files[0];
+
+  if (!file || !file.type.startsWith("image/")) {
+
+    previewDiv.style.display = "none";
+
+    return;
+  }
+
+  previewImg.src = URL.createObjectURL(file);
+
+  previewDiv.style.display = "block";
+};
+
+previewImg.onload = () => {
+  URL.revokeObjectURL(previewImg.src);
+};
 
 /* INIT */
 loginBtn.onclick = login;
