@@ -45,10 +45,8 @@
          LEFT: FORM
     ====================== -->
 
-<button id="showEditorBtn">
-  Nuovo prodotto
-</button>
-
+<button id="showEditorBtn" class="floating-btn">+</button>
+  <div id="modalOverlay" class="modal-overlay">
     <div class="panel-card" id="newProduct">
 
       <h3>Nuovo prodotto</h3>
@@ -88,9 +86,11 @@
       <button id="addBtn" class="btn-primary">
         Aggiungi prodotto
       </button>
-
     </div>
-
+  </div>
+  <div class="search-box">
+    <input id="searchInput" placeholder="cerca nel catalogo..."></input>
+    </div>
     <!-- =====================
          RIGHT: DASHBOARD + LIST
     ====================== -->
@@ -129,10 +129,14 @@
 <!-- =========================
      SCRIPTS
 ========================= -->
+
+
 <script src="/js/toast.js"></script>
 <script src="/js/modal.js"></script>
 <script src="/js/admin.js"></script>
-
+<!-- =========================
+     FOOTER
+========================= -->
 
 </body>
 </html>

@@ -1,5 +1,6 @@
 let editingId = null;
 let products = [];
+let searchTimeout = 0;
 
 /* SHORTCUT */
 const $ = id => document.getElementById(id);
@@ -18,7 +19,6 @@ function resetEditor() {
 
   $("preview").style.display = "none";
 
-  toast.success("Modalità creazione");
 }
 
 /* LOGIN */
@@ -43,7 +43,6 @@ async function login() {
   loginBox.classList.add("hidden");
   panel.classList.remove("hidden");
 
-  toast.success("Login effettuato");
 
   load();
 }
@@ -62,7 +61,7 @@ async function load() {
   $("statVisible").textContent =
     products.filter(p => p.visible === 1).length;
 
-  list.innerHTML = "";
+  renderList(products);
 
   products.forEach(p => {
 
@@ -160,7 +159,7 @@ async function save() {
       ? "Prodotto creato"
       : "Prodotto aggiornato"
   );
-
+  $("modalOverlay").classList.remove("show");
   load();
 }
 
@@ -183,8 +182,8 @@ async function edit(id) {
   category.value = p.category;
 
   $("newProduct").style.display = "block";
+  $("modalOverlay").classList.add("show");
 
-  toast.info("Modalità modifica");
 }
 
 /* DELETE */
@@ -232,6 +231,101 @@ function clear() {
   $("preview").style.display = "none";
   $("newProduct").style.display = "none";
 }
+/* SEARCH */
+
+$("searchInput").addEventListener("input", () => {
+
+  const value = $("searchInput").value.toLowerCase().trim();
+
+  const filtered = products.filter(p =>
+    p.name.toLowerCase().includes(value) ||
+    p.description.toLowerCase().includes(value) ||
+    p.category.toLowerCase().includes(value)
+  );
+
+  renderList(filtered);
+});
+
+$("searchInput").addEventListener("input", () => {
+
+  clearTimeout(searchTimeout);
+
+  searchTimeout = setTimeout(() => {
+
+    const value = $("searchInput").value.toLowerCase().trim();
+
+    const filtered = products.filter(p =>
+      p.name.toLowerCase().includes(value) ||
+      p.description.toLowerCase().includes(value) ||
+      p.category.toLowerCase().includes(value)
+    );
+
+    renderList(filtered);
+
+  }, 150);
+
+});
+
+/* RENDER LIST */
+
+function renderList(data) {
+
+  list.innerHTML = "";
+
+  data.forEach(p => {
+
+    const imagePath = p.image
+      ? `/uploads/${p.image}`
+      : "/assets/logo.png";
+
+    list.innerHTML += `
+      <div class="admin-product">
+
+        <div class="admin-product-left">
+
+          <img
+            class="admin-thumb"
+            src="${imagePath}"
+            alt="${p.name}"
+          >
+
+          <div>
+            <h4>${p.name}</h4>
+            <p>€${Number(p.price).toFixed(2)}</p>
+          </div>
+
+        </div>
+
+        <div class="admin-actions">
+
+          <button
+            id="edit-${p.id}"
+            data-action="edit"
+            data-id="${p.id}">
+            Edit
+          </button>
+
+          <button
+            id="toggle-${p.id}"
+            data-action="toggle"
+            data-id="${p.id}"
+            data-visible="${p.visible}">
+            ${p.visible ? "Hide" : "Show"}
+          </button>
+
+          <button
+            id="delete-${p.id}"
+            data-action="delete"
+            data-id="${p.id}">
+            Delete
+          </button>
+
+        </div>
+
+      </div>
+    `;
+  });
+}
 
 /* SHOW EDITOR */
 $("showEditorBtn").onclick = () => {
@@ -239,8 +333,21 @@ $("showEditorBtn").onclick = () => {
   resetEditor();
 
   $("newProduct").style.display = "block";
+  document.getElementById("modalOverlay").classList.add("show");
 };
 
+/* UNSHOW EDITOR */
+function closeModal(){
+    $("modalOverlay").classList.remove("show");
+}
+
+$("modalOverlay").addEventListener("click", e => {
+
+    if(e.target === $("modalOverlay")){
+        closeModal();
+    }
+
+});
 /* LIST ACTIONS */
 list.onclick = e => {
 
